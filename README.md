@@ -33,10 +33,15 @@ A simple AI agent built with the GitHub Copilot SDK, running as an Azure Functio
    curl -X POST http://localhost:7071/api/ask -d "what are the laws"
    ```
 
-   Set `AGENT_URL` to point to a deployed instance:
+   Set `AGENT_URL` and `FUNCTION_KEY` to point to a deployed instance:
 
    ```bash
-   AGENT_URL=https://<your-function-app>.azurewebsites.net dotnet run
+   export AGENT_URL=$(azd env get-value SERVICE_API_URI)
+   export FUNCTION_KEY=$(az functionapp keys list \
+     -n $(azd env get-value AZURE_FUNCTION_APP_NAME) \
+     -g $(azd env get-value RESOURCE_GROUP) \
+     --query "functionKeys.default" -o tsv)
+   dotnet run
    ```
 
 > **Want to use Microsoft Foundry models instead?** See [Deploy Microsoft Foundry Resources](#deploy-microsoft-foundry-resources) below.

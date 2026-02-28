@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 
 var baseUrl = Environment.GetEnvironmentVariable("AGENT_URL") ?? "http://localhost:7071";
+var functionKey = Environment.GetEnvironmentVariable("FUNCTION_KEY");
 using var http = new HttpClient();
 
 Console.WriteLine("=== Simple Agent Chat ===");
@@ -24,7 +25,10 @@ while (true)
 
     try
     {
-        var response = await http.PostAsync($"{baseUrl}/api/ask", new StringContent(message, Encoding.UTF8, "text/plain"));
+        var url = $"{baseUrl}/api/ask";
+        if (!string.IsNullOrEmpty(functionKey))
+            url += $"?code={functionKey}";
+        var response = await http.PostAsync(url, new StringContent(message, Encoding.UTF8, "text/plain"));
         var body = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"\nAgent: {body}\n");
     }
