@@ -10,6 +10,12 @@
     },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "modelName": {
+      "value": "${AZURE_OPENAI_MODEL_NAME}"
+    },
+    "modelVersion": {
+      "value": "${AZURE_OPENAI_MODEL_VERSION}"
     }
   }
 }

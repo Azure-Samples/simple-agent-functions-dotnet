@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,10 +7,18 @@
     <RootNamespace>simple_agent_functions_dotnet</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>492abc3b-aefd-4a9d-8c7c-ff299a8a014b</UserSecretsId>
+  </PropertyGroup>
+
+  <!-- Azure Functions Flex Consumption runs on Linux; ensure the Copilot SDK
+       bundles the linux-x64 native binary for deployment (Release = azd publish). -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Azure.Identity" Version="1.*" />
     <PackageReference Include="GitHub.Copilot.SDK" Version="*" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.*" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.*" />
