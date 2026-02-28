@@ -21,7 +21,8 @@ public class Ask
     {
         var config = new SessionConfig
         {
-            SystemMessage = new SystemMessageConfig { Content = Instructions }
+            SystemMessage = new SystemMessageConfig { Content = Instructions },
+            OnPermissionRequest = PermissionHandler.ApproveAll
         };
         var baseUrl = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
         var apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
