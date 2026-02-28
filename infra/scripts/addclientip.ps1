@@ -17,11 +17,11 @@ $ConfigFolder = ($ResourceGroup -split '-' | Select-Object -Skip 1) -join '-'
 $jsonContent = Get-Content -Path ".azure\$ConfigFolder\config.json" -Raw | ConvertFrom-Json
 
 # Check for either skipVnet or vnetEnabled parameters
-$vnetDisabled = $false
+$vnetDisabled = $true
 if ($jsonContent.infra.parameters.PSObject.Properties.Name -contains "skipVnet") {
     $vnetDisabled = $jsonContent.infra.parameters.skipVnet -eq $true
 } elseif ($jsonContent.infra.parameters.PSObject.Properties.Name -contains "vnetEnabled") {
-    $vnetDisabled = $jsonContent.infra.parameters.vnetEnabled -eq $false
+    $vnetDisabled = $jsonContent.infra.parameters.vnetEnabled -ne $true
 }
 
 if ($vnetDisabled) {

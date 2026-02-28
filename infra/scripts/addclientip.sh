@@ -16,26 +16,26 @@ done <<< "$output"
 ConfigFolder=$(echo "$ResourceGroup" | cut -d'-' -f2-)
 configFile=".azure/$ConfigFolder/config.json"
 
-vnetDisabled=false
+vnetDisabled=true
 if [[ -f "$configFile" ]]; then
     jsonContent=$(cat "$configFile")
     
     # Check for skipVnet parameter first
     if echo "$jsonContent" | grep -q '"skipVnet"'; then
         skipVnet=$(echo "$jsonContent" | grep '"skipVnet"' | sed 's/.*"skipVnet":\s*\([^,}]*\).*/\1/' | tr -d ' ')
-        if echo "$skipVnet" | grep -iq "true"; then
-            vnetDisabled=true
+        if echo "$skipVnet" | grep -iq "false"; then
+            vnetDisabled=false
         fi
     # Check for vnetEnabled parameter
     elif echo "$jsonContent" | grep -q '"vnetEnabled"'; then
         vnetEnabled=$(echo "$jsonContent" | grep '"vnetEnabled"' | sed 's/.*"vnetEnabled":\s*\([^,}]*\).*/\1/' | tr -d ' ')
-        if echo "$vnetEnabled" | grep -iq "false"; then
-            vnetDisabled=true
+        if echo "$vnetEnabled" | grep -iq "true"; then
+            vnetDisabled=false
         fi
     fi
 else
-    echo "Config file $configFile not found. Assuming VNet is enabled."
-    vnetDisabled=false
+    echo "Config file $configFile not found. Assuming VNet is disabled."
+    vnetDisabled=true
 fi
 
 if [ "$vnetDisabled" = true ]; then
