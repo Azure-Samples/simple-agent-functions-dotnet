@@ -3,6 +3,6 @@
     "Values": {
         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "GITHUB_REPOSITORY": "microsoft-foundry/foundry-samples"
+        "GITHUB_REPOSITORY": "Azure/azure-functions-host"
     }
 }

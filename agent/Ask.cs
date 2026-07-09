@@ -14,7 +14,7 @@ public class Ask
     private static CopilotClient? _client;
     private static readonly Lock _clientLock = new();
     private static readonly GitHubDigestClient DigestClient = new();
-    private const string DefaultRepository = "microsoft-foundry/foundry-samples";
+    private const string DefaultRepository = "Azure/azure-functions-host";
 
     private static readonly string Instructions = """
         You create concise daily GitHub repository digests from live repository data.
