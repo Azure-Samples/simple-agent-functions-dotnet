@@ -1,6 +1,6 @@
-# Simple Agent QuickStart (.NET Copilot SDK)
+# Daily Repo Digest QuickStart (.NET Copilot SDK on Azure Functions)
 
-A simple AI agent built with the GitHub Copilot SDK, running as an Azure Function.
+A simple AI agent built with the GitHub Copilot SDK, running as an Azure Function. It creates live daily GitHub repository digests for recent pull requests, issues, and workflow failures. The default repository is `microsoft-foundry/foundry-samples`.
 
 > Looking for [Python](https://github.com/Azure-Samples/simple-agent-functions-python) or [TypeScript](https://github.com/Azure-Samples/simple-agent-functions-typescript)?
 
@@ -10,21 +10,27 @@ A simple AI agent built with the GitHub Copilot SDK, running as an Azure Functio
 - [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azure Developer CLI (azd)](https://aka.ms/azd-install) (only needed for deploying Microsoft Foundry resources)
 - Access to an AI model via one of:
-  - **GitHub Copilot subscription** — models are available automatically
-  - **Bring Your Own Key (BYOK)** — use an API key from [Microsoft Foundry](https://ai.azure.com) (see [BYOK docs](https://github.com/github/copilot-sdk/blob/main/docs/auth/byok.md))
+  - **GitHub Copilot subscription**: models are available automatically
+  - **Bring Your Own Key (BYOK)**: use an API key from [Microsoft Foundry](https://ai.azure.com) (see [BYOK docs](https://github.com/github/copilot-sdk/blob/main/docs/auth/byok.md))
 
 ## Quickstart
 
 1. Clone the repository
 
-2. Run the function locally:
+2. Restore dependencies:
+
+   ```bash
+   dotnet restore
+   ```
+
+3. Run the function locally:
 
    ```bash
    cd agent
    func start
    ```
 
-3. Test the agent (in a new terminal):
+4. Test the digest agent (in a new terminal):
 
    ```bash
    # Interactive chat client
@@ -32,10 +38,11 @@ A simple AI agent built with the GitHub Copilot SDK, running as an Azure Functio
    dotnet run
 
    # Or use curl directly
-   curl -X POST http://localhost:7071/api/ask -d "what are the laws"
+   curl -X POST http://localhost:7071/api/ask \
+     -d "Create a concise daily repo digest for microsoft-foundry/foundry-samples."
    ```
 
-   Set `AGENT_URL` and `FUNCTION_KEY` to point to a deployed instance:
+   To chat with a deployed instance, grab the URL and function key from your `azd` environment:
 
    ```bash
    export AGENT_URL=$(azd env get-value SERVICE_API_URI)
@@ -43,20 +50,30 @@ A simple AI agent built with the GitHub Copilot SDK, running as an Azure Functio
      -n $(azd env get-value AZURE_FUNCTION_APP_NAME) \
      -g $(azd env get-value RESOURCE_GROUP) \
      --query "functionKeys.default" -o tsv)
+   cd chat
    dotnet run
    ```
 
-> **Want to use Microsoft Foundry models instead?** See [Deploy Microsoft Foundry Resources](#deploy-microsoft-foundry-resources) below.
+> **Want to use your own models?** See [Deploy Microsoft Foundry Resources](#deploy-microsoft-foundry-resources) below to provision a Microsoft Foundry project instead of using GitHub Copilot models.
 
 ## Source Code
 
-The agent logic is in [`agent/Ask.cs`](agent/Ask.cs). It creates a `CopilotClient`, configures a session with a system message (Asimov's Three Laws of Robotics), and exposes an HTTP endpoint (`/api/ask`) that accepts a prompt and returns the agent's response.
+The agent logic is in [`agent/Ask.cs`](agent/Ask.cs) and [`agent/GitHubDigestClient.cs`](agent/GitHubDigestClient.cs). It fetches live public GitHub data through REST APIs, creates a `CopilotClient`, and asks the model to produce a concise daily digest. The sample keeps the Azure Functions hosting model from this repo and exposes:
+
+- An HTTP endpoint at `/api/ask` for chat or API requests.
+- A timer-triggered function named `daily_repo_digest` that runs the digest at 9 AM Pacific.
 
 [`chat/Chat.cs`](chat/Chat.cs) is a lightweight .NET console client that POSTs messages to the function in a loop, giving you an interactive chat experience. It defaults to `http://localhost:7071` but can be pointed at a deployed instance via the `AGENT_URL` environment variable.
 
+Ask for a digest with an optional public repo such as `microsoft-foundry/foundry-samples`. If you omit the repo, the agent uses `microsoft-foundry/foundry-samples` by default. Set `GITHUB_REPOSITORY` to change the default repository. Set `GITHUB_TOKEN` only if you want higher public GitHub API rate limits.
+
+## Daily Schedule
+
+The timer trigger uses the Azure Functions NCRONTAB schedule `0 0 16,17 * * *`. Azure Functions timer schedules run in UTC for this Linux Functions sample, so the function wakes at both possible 9 AM Pacific UTC offsets and only creates a digest when the current Pacific hour is 9. This keeps the sample aligned with Pacific daylight and standard time without adding a separate scheduler service.
+
 ## Deploy Microsoft Foundry Resources
 
-If you're using BYOK and don't already have a Microsoft Foundry project with a model deployed:
+If you prefer to use your own models via BYOK and don't already have a Microsoft Foundry project with a model deployed:
 
 ```bash
 azd auth login
@@ -84,8 +101,8 @@ export AZURE_OPENAI_MODEL="gpt-5-mini"  # optional, defaults to gpt-5-mini
 ```
 
 **Getting these values:**
-- If you ran `azd up`, the endpoint is already in your environment — run `azd env get-values | grep AZURE_OPENAI_ENDPOINT`
-- For the API key, go to [Azure Portal](https://portal.azure.com) → your AI Services resource → **Keys and Endpoint** → select the **Azure OpenAI** tab
+- If you ran `azd up`, the endpoint is already in your environment. Run `azd env get-values | grep AZURE_OPENAI_ENDPOINT`
+- For the API key, go to [Azure Portal](https://portal.azure.com), your AI Services resource, **Keys and Endpoint**, then select the **Azure OpenAI** tab
 - Or find both in the [Microsoft Foundry portal](https://ai.azure.com) under your project settings
 
 See the [BYOK docs](https://github.com/github/copilot-sdk/blob/main/docs/auth/byok.md) for details.

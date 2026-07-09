@@ -9,7 +9,7 @@ var baseUrl = Environment.GetEnvironmentVariable("AGENT_URL") ?? "http://localho
 var functionKey = Environment.GetEnvironmentVariable("FUNCTION_KEY");
 using var http = new HttpClient();
 
-Console.WriteLine("=== Simple Agent Chat ===");
+Console.WriteLine("=== Daily Repo Digest Chat ===");
 Console.WriteLine($"Endpoint: {baseUrl}/api/ask");
 Console.WriteLine("Type 'exit' or 'quit' to end.\n");
 
