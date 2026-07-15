@@ -2,7 +2,7 @@
 
 name: simple-agent-framework-functions-dotnet
 metadata:
-  template: simple-agent-functions-dotnet@2.0.0
+  template: simple-agent-functions-dotnet@2.1.0
 services:
   api:
     project: ./agent

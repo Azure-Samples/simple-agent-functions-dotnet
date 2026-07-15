@@ -356,3 +356,6 @@ Desktop.ini
 .env.local
 .env.production
 .env.development
+
+# Generated Bicep output
+infra/main.json
